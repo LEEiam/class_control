@@ -19,7 +19,7 @@
 #define RADIUS_MAX          60.0f       /* max radius in cm */
 #define RADIUS_DEFAULT      30.0f       /* default radius in cm */
 #define ANGLE_MIN           0.0f        /* min angle */
-#define ANGLE_MAX           90.0f       /* max angle */
+#define ANGLE_MAX           180.0f      /* max angle */
 #define ANGLE_DEFAULT       0.0f        /* default angle */
 
 #define INC_KP              0           /* Kp for incremental pid controller */
@@ -208,9 +208,9 @@ void swing_mode_3(void)
         anop_upload_float(ANOP_FUNC_CUSTOM_2, &el.pitch, 1);
         anop_upload_float(ANOP_FUNC_CUSTOM_3, &duty_ratio_x, 1);
         
-//        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
-//        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
-//        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
     #endif
     }
 }
