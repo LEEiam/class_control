@@ -251,9 +251,45 @@ void swing_mode_4(void)
 
 void swing_mode_5(void)
 {
-    while(1)
+    struct euler_angle el;
+    float duty_ratio_x;
+    float duty_ratio_y;
+    float theta;
+    float angle_x;
+    float angle_y;
+    float set_pitch;
+    float set_roll;
+    
+    t = 0;
+    
+    while (1)
     {
         rt_sem_take(&sem, RT_WAITING_FOREVER);
+        
+        /* calculate angle amplitude */
+        angle_x = atan(radius / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
+        angle_y = atan(radius / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
+        /* calculate current target radian */
+        theta = t * (2 * PI / PENDULUM_CYCLE);
+        /* calculate current target angle */
+        set_pitch = angle_x * sin(theta);
+        set_roll  = angle_y * sin(theta + PI / 2);
+        /* fetch currnet euler angle */
+        dmp_get_eulerangle(&el);
+        /* calculate the output duty ratio */
+        duty_ratio_x = pid_incremental_ctrl(pid_x, set_pitch, el.pitch);
+        duty_ratio_y = pid_incremental_ctrl(pid_y, set_roll, el.roll);
+        swing_move(duty_ratio_x, duty_ratio_y);
+        
+    #ifdef RT_USING_ANOP
+        anop_upload_float(ANOP_FUNC_CUSTOM_1, &set_pitch, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_2, &el.pitch, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_3, &duty_ratio_x, 1);
+        
+        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
+    #endif
     }
 }
 
