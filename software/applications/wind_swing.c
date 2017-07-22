@@ -15,7 +15,9 @@
 
 #define SAMPLE_INTERVAL     1000 / DEFAULT_MPU_HZ   /* sample interval in ms */
 #define OUTPUT_LIMIT        80          /* output limit for duty ratio in % */
-#define DEFAULT_RADIUS      30.0f       /* default radius in cm */
+#define RADIUS_MIN          0.0f        /* max radius in cm */
+#define RADIUS_MAX          60.0f       /* min radius in cm */
+#define RADIUS_DEFAULT      30.0f       /* default radius in cm */
 
 #define INC_KP              0           /* Kp for incremental pid controller */
 #define INC_KI              0           /* Ki for incremental pid controller */
@@ -25,13 +27,13 @@
 #define POS_KI              0           /* Ki for position pid controller */
 #define POS_KD              0           /* Kd for position pid controller */
 
-static rt_tick_t t = 0;
-static float radius = DEFAULT_RADIUS;
-
 static pid_t pid_x;
 static pid_t pid_y;
 static struct rt_timer timer;
 static struct rt_semaphore sem;
+
+static float radius = RADIUS_DEFAULT;
+static rt_tick_t t = 0;
 
 static void swing_move(int duty_ratio_x, int duty_ratio_y)
 {
@@ -98,7 +100,7 @@ void swing_mode_1(void)
         rt_sem_take(&sem, RT_WAITING_FOREVER);
         
         /* calculate angle amplitude */
-        angle = atan(DEFAULT_RADIUS / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
+        angle = atan(RADIUS_DEFAULT / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
         /* calculate current target radian */
         theta = t * (2 * PI / PENDULUM_CYCLE);
         /* calculate current target angle */
@@ -189,6 +191,14 @@ void swing_mode_5(void)
     }
 }
 
+void swing_set_radius(float r)
+{
+    rt_enter_critical();
+    if (RADIUS_MIN <= r && r <= RADIUS_MAX)
+        radius = r;
+    rt_exit_critical();
+}
+
 void swing_init(int mode)
 {
     rt_thread_t tid;
@@ -241,6 +251,14 @@ void swing_deinit(void)
 
 #ifdef RT_USING_FINSH
 #include <finsh.h>
+
+void cmd_swing_raduis(int argc, char *argv[])
+{
+    if (argc == 2)
+        swing_init(atof(argv[1]));
+    else
+        rt_kprintf("Usage: swradius <radius>\n");
+}
 
 void cmd_swing_pid(int argc, char *argv[])
 {
