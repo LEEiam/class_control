@@ -177,9 +177,35 @@ void swing_mode_3(void)
 
 void swing_mode_4(void)
 {
+    struct euler_angle el;
+    float duty_ratio_x;
+    float duty_ratio_y;
+    float set_pitch;
+    float set_roll;
+    
     while(1)
     {
         rt_sem_take(&sem, RT_WAITING_FOREVER);
+        
+        /* calculate current target angle */
+        set_pitch = 0.0f;
+        set_roll  = 0.0f;
+        /* fetch currnet euler angle */
+        dmp_get_eulerangle(&el);
+        /* calculate the output duty ratio */
+        duty_ratio_x = pid_incremental_ctrl(pid_x, set_pitch, el.pitch);
+        duty_ratio_y = pid_incremental_ctrl(pid_y, set_roll, el.roll);
+        swing_move(duty_ratio_x, duty_ratio_y);
+        
+    #ifdef RT_USING_ANOP
+        anop_upload_float(ANOP_FUNC_CUSTOM_1, &set_pitch, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_2, &el.pitch, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_3, &duty_ratio_x, 1);
+        
+//        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
+//        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
+//        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
+    #endif
     }
 }
 
