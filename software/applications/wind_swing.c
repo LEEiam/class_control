@@ -8,17 +8,25 @@
 #include "anop.h"
 #endif
 
-#define PENDULUM_CYCLE      1188        /* 1188 millisecond, rod length 0.35 meters */
-#define MACHINE_HEIGTH      49          /* heigth of the machine */
-#define PI                  3.14159f    /* ¦° value */
+#define PENDULUM_CYCLE      1108        /* 1108 ms, rod length: 0.307m */
+#define MACHINE_HEIGTH      49          /* heigth of the wind swing in cm */
+#define PI                  3.14159f    /* ¦° value in float type */
 #define RADIAN_TO_ANGLE     180 / PI    /* convert radian to angle */
 
-#define SAMPLE_INTERVAL     20          /* 100 millisecond */
-#define OUTPUT_LIMIT        60          /* 60% duty ratio */
+#define SAMPLE_INTERVAL     20          /* sample interval in ms */
+#define OUTPUT_LIMIT        80          /* output limit for duty ratio in % */
+#define DEFAULT_RADIUS      30.0f       /* default radius in cm */
 
-#define KP                  0
-#define KI                  0
-#define KD                  0
+#define INC_KP              0           /* Kp for incremental pid controller */
+#define INC_KI              0           /* Ki for incremental pid controller */
+#define INC_KD              0           /* Kd for incremental pid controller */
+
+#define POS_KP              0           /* Kp for position pid controller */
+#define POS_KI              0           /* Ki for position pid controller */
+#define POS_KD              0           /* Kd for position pid controller */
+
+static rt_tick_t t = 0;
+static float radius = DEFAULT_RADIUS;
 
 static pid_t pid_x;
 static pid_t pid_y;
@@ -56,7 +64,24 @@ static void swing_move(int duty_ratio_x, int duty_ratio_y)
     }
 }
 
-static void swing_mode_1(void)
+static void swing_timer_cb(void *args)
+{
+    rt_enter_critical();
+    t += SAMPLE_INTERVAL;
+    rt_exit_critical();
+    
+    rt_sem_release(&sem);
+}
+
+static void swing_thread_entry(void *parameter)
+{
+    void (*swing_mode)(void) = (void(*)(void))parameter;
+    
+    /* execute the setting mode */
+    swing_mode();
+}
+
+void swing_mode_1(void)
 {
     struct euler_angle el;
     float duty_ratio_x;
@@ -65,14 +90,15 @@ static void swing_mode_1(void)
     float angle;
     float set_pitch;
     float set_roll;
-    static rt_tick_t t = 0;
+    
+    t = 0;
     
     while (1)
     {
         rt_sem_take(&sem, RT_WAITING_FOREVER);
         
         /* calculate angle amplitude */
-        angle = atan(30.0f / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
+        angle = atan(DEFAULT_RADIUS / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
         /* calculate current target radian */
         theta = t * (2 * PI / PENDULUM_CYCLE);
         /* calculate current target angle */
@@ -84,8 +110,6 @@ static void swing_mode_1(void)
         duty_ratio_x = pid_incremental_ctrl(pid_x, set_pitch, el.pitch);
         duty_ratio_y = pid_incremental_ctrl(pid_y, set_roll, el.roll);
         swing_move(duty_ratio_x, duty_ratio_y);
-        
-        t += SAMPLE_INTERVAL;
         
     #ifdef RT_USING_ANOP
         anop_upload_float(ANOP_FUNC_CUSTOM_1, &set_pitch, 1);
@@ -99,49 +123,70 @@ static void swing_mode_1(void)
     }
 }
 
-static void swing_mode_2(void)
+void swing_mode_2(void)
 {
-    while(1)
-    {
-        rt_sem_take(&sem, RT_WAITING_FOREVER);
-    }
-}
-
-static void swing_mode_3(void)
-{
-    while(1)
-    {
-        rt_sem_take(&sem, RT_WAITING_FOREVER);
-    }
-}
-
-static void swing_mode_4(void)
-{
-    while(1)
-    {
-        rt_sem_take(&sem, RT_WAITING_FOREVER);
-    }
-}
-
-static void swing_mode_5(void)
-{
-    while(1)
-    {
-        rt_sem_take(&sem, RT_WAITING_FOREVER);
-    }
-}
-
-static void swing_timer_cb(void *args)
-{
-    rt_sem_release(&sem);
-}
-
-static void swing_thread_entry(void *parameter)
-{
-    void (*swing_mode)(void) = (void(*)(void))parameter;
+    struct euler_angle el;
+    float duty_ratio_x;
+    float duty_ratio_y;
+    float theta;
+    float angle;
+    float set_pitch;
+    float set_roll;
     
-    /* execute the setting mode */
-    swing_mode();
+    t = 0;
+    
+    while (1)
+    {
+        rt_sem_take(&sem, RT_WAITING_FOREVER);
+        
+        /* calculate angle amplitude */
+        angle = atan(radius / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
+        /* calculate current target radian */
+        theta = t * (2 * PI / PENDULUM_CYCLE);
+        /* calculate current target angle */
+        set_pitch = angle * sin(theta);
+        set_roll  = 0.0f;
+        /* fetch currnet euler angle */
+        dmp_get_eulerangle(&el);
+        /* calculate the output duty ratio */
+        duty_ratio_x = pid_incremental_ctrl(pid_x, set_pitch, el.pitch);
+        duty_ratio_y = pid_incremental_ctrl(pid_y, set_roll, el.roll);
+        swing_move(duty_ratio_x, duty_ratio_y);
+        
+    #ifdef RT_USING_ANOP
+        anop_upload_float(ANOP_FUNC_CUSTOM_1, &set_pitch, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_2, &el.pitch, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_3, &duty_ratio_x, 1);
+        
+//        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
+//        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
+//        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
+    #endif
+    }
+}
+
+void swing_mode_3(void)
+{
+    while(1)
+    {
+        rt_sem_take(&sem, RT_WAITING_FOREVER);
+    }
+}
+
+void swing_mode_4(void)
+{
+    while(1)
+    {
+        rt_sem_take(&sem, RT_WAITING_FOREVER);
+    }
+}
+
+void swing_mode_5(void)
+{
+    while(1)
+    {
+        rt_sem_take(&sem, RT_WAITING_FOREVER);
+    }
 }
 
 void swing_init(int mode)
@@ -153,8 +198,8 @@ void swing_init(int mode)
     pid_y = pid_create();
     pid_set_output_limit(pid_x, -OUTPUT_LIMIT, OUTPUT_LIMIT);
     pid_set_output_limit(pid_y, -OUTPUT_LIMIT, OUTPUT_LIMIT);
-    pid_config(pid_x, KP, KI, KD);
-    pid_config(pid_y, KP, KI, KD);
+    pid_config(pid_x, INC_KP, INC_KI, INC_KD);
+    pid_config(pid_y, INC_KP, INC_KI, INC_KD);
     
     switch(mode)
     {
@@ -173,8 +218,6 @@ void swing_init(int mode)
     rt_timer_init(&timer, "swing_timer", swing_timer_cb, RT_NULL, 
         rt_tick_from_millisecond(SAMPLE_INTERVAL), RT_TIMER_FLAG_PERIODIC);
     rt_timer_start(&timer);
-    
-    swing_move(0, 0);
 }
 
 void swing_deinit(void)
