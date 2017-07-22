@@ -13,7 +13,7 @@
 #define PI                  3.14159f    /* ¦° value in float type */
 #define RADIAN_TO_ANGLE     180 / PI    /* convert radian to angle */
 
-#define SAMPLE_INTERVAL     20          /* sample interval in ms */
+#define SAMPLE_INTERVAL     1000 / DEFAULT_MPU_HZ   /* sample interval in ms */
 #define OUTPUT_LIMIT        80          /* output limit for duty ratio in % */
 #define DEFAULT_RADIUS      30.0f       /* default radius in cm */
 
