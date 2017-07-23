@@ -46,9 +46,11 @@ static unsigned short inv_orientation_matrix_to_scalar(const signed char *mtx)
 
 static unsigned char run_self_test(void)
 {
-	int result;
 	long gyro[3], accel[3];
+	int result;
+    int tries = 5;
     
+    begin:
 	result = mpu_run_self_test(gyro, accel);
 	if (result == 0x3) 
 	{
@@ -69,8 +71,11 @@ static unsigned char run_self_test(void)
 		dmp_set_accel_bias(accel);
 		return 0;
 	}
-    else
-        return 1;
+
+    if (tries--)
+        goto begin;
+    
+    return 1;
 }
 
 static void dmp_thread_entry(void* parameter)
