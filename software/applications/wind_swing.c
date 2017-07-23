@@ -14,13 +14,15 @@
 #define RADIAN_TO_ANGLE     180 / PI    /* convert radian to angle */
 
 #define SAMPLE_INTERVAL     1000 / DEFAULT_MPU_HZ   /* sample interval in ms */
-#define OUTPUT_LIMIT        80          /* output limit for duty ratio in % */
 #define RADIUS_MIN          0.0f        /* min radius in cm */
 #define RADIUS_MAX          60.0f       /* max radius in cm */
 #define RADIUS_DEFAULT      30.0f       /* default radius in cm */
 #define ANGLE_MIN           0.0f        /* min angle */
 #define ANGLE_MAX           180.0f      /* max angle */
 #define ANGLE_DEFAULT       0.0f        /* default angle */
+
+#define OUTPUT_LIMIT        80          /* output limit for duty ratio in % */
+#define INTEGRAL_SEPARATE   20          /* integral separation in angle */
 
 #define INC_KP              0           /* Kp for incremental pid controller */
 #define INC_KI              0           /* Ki for incremental pid controller */
