@@ -27,7 +27,8 @@ void  pid_delete(pid_t pid);
 void  pid_reset(pid_t pid);
 
 void  pid_config(pid_t pid, float Kp, float Ki, float Kd);
-void pid_set_integral_limit(pid_t pid, float imin, float imax);
+void  pid_set_integral_separation(pid_t pid, float separ_imin, float separ_imax);
+void  pid_set_integral_limit(pid_t pid, float imin, float imax);
 void  pid_set_output_limit(pid_t pid, float umin, float umax);
 float pid_position_ctrl(pid_t pid, float set, float actual);
 float pid_incremental_ctrl(pid_t pid, float set, float actual);
