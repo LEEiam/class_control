@@ -201,34 +201,27 @@ int dmp_sys_init(void)
 {
     static struct int_param_s int_param;
     static signed char orientation[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
-    int tries = 10;
     
     i2c_bus = rt_i2c_bus_device_find("i2c1");
     RT_ASSERT(i2c_bus);
 
-begin:
-    if (mpu_init(&int_param)) goto err;
-    if (mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL)) goto err;
+    mpu_init(&int_param);
+    mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL);
     /* Push both gyro and accel data into the FIFO. */
-    if (mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL)) goto err;
-    if (mpu_set_sample_rate(DEFAULT_MPU_HZ)) goto err;
-    if (dmp_load_motion_driver_firmware()) goto err;
-    if (dmp_set_orientation(inv_orientation_matrix_to_scalar(orientation))) goto err;
-    if (dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT     | DMP_FEATURE_TAP | 
-                           DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | 
-                           DMP_FEATURE_SEND_CAL_GYRO  | DMP_FEATURE_GYRO_CAL)) goto err;
-    if (dmp_set_fifo_rate(DEFAULT_MPU_HZ)) goto err;
+    mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL);
+    mpu_set_sample_rate(DEFAULT_MPU_HZ);
+    dmp_load_motion_driver_firmware();
+    dmp_set_orientation(inv_orientation_matrix_to_scalar(orientation));
+    dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT     | DMP_FEATURE_TAP | 
+                       DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | 
+                       DMP_FEATURE_SEND_CAL_GYRO  | DMP_FEATURE_GYRO_CAL);
+    dmp_set_fifo_rate(DEFAULT_MPU_HZ);
     
-    if (run_self_test()) goto err;
-    
+    run_self_test();
     dmp_thread_init();
     mpu_set_dmp_state(1);
     
     return 0;
-err:
-    if (tries --)
-        goto begin;
-    return -1;
 }
 
 #ifdef RT_USING_FINSH
