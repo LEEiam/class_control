@@ -12,38 +12,39 @@
 #define MACHINE_HEIGTH      49          /* heigth of the machine in cm */
 #define PI                  3.14159f    /* ¦° value in float type */
 #define RADIAN_TO_ANGLE     180 / PI    /* convert radian to angle */
+#define ANGLE_TO_RADIAN     PI / 180    /* convert angle to radian */
 
 #define SAMPLE_INTERVAL     1000 / DEFAULT_MPU_HZ   /* sample interval in ms */
-#define RADIUS_MIN          0.0f        /* min radius in cm */
-#define RADIUS_MAX          60.0f       /* max radius in cm */
+#define RADIUS_MIN          15.0f       /* min radius in cm */
+#define RADIUS_MAX          35.0f       /* max radius in cm */
 #define RADIUS_DEFAULT      30.0f       /* default radius in cm */
 #define ANGLE_MIN           0.0f        /* min angle */
 #define ANGLE_MAX           180.0f      /* max angle */
-#define ANGLE_DEFAULT       0.0f        /* default angle */
+#define RADIAN_DEFAULT      0.0f        /* default radian */
 
 #define SWING_USE_POS_PID
 //#define SWING_USE_INC_PID
 
 #define OUTPUT_LIMIT        80          /* output limit for duty ratio in % */
-#define INTEGRAL_LIMIT      00          /* integral limit in angle */
-#define INTEGRAL_SEPARATE   10          /* integral separation in angle */
+#define INTEGRAL_LIMIT      300         /* integral limit in angle */
+#define INTEGRAL_SEPARATE   05          /* integral separation in angle */
 
 #define INC_KP              0.04f       /* Kp for incremental pid controller */
 #define INC_KI              0.01f       /* Ki for incremental pid controller */
 #define INC_KD              450         /* Kd for incremental pid controller */
 
-#define POS_KP              0           /* Kp for position pid controller */
-#define POS_KI              0           /* Ki for position pid controller */
-#define POS_KD              0           /* Kd for position pid controller */
+#define POS_KP              2.2f        /* Kp for position pid controller */
+#define POS_KI              0.01f       /* Ki for position pid controller */
+#define POS_KD              400         /* Kd for position pid controller */
 
 static pid_t pid_x;
 static pid_t pid_y;
 static struct rt_timer timer;
 static struct rt_semaphore sem;
 
-static float radius = RADIUS_DEFAULT;
-static float angle = ANGLE_DEFAULT;
 static rt_tick_t t = 0;
+static float radius = RADIUS_DEFAULT;
+static float radian = RADIAN_DEFAULT;
 
 static void swing_move(int duty_ratio_x, int duty_ratio_y)
 {
@@ -119,8 +120,13 @@ void swing_mode_1(void)
         /* fetch currnet euler angle */
         dmp_get_eulerangle(&el);
         /* calculate the output duty ratio */
+    #if defined (SWING_USE_POS_PID)
+        duty_ratio_x = pid_position_ctrl(pid_x, set_pitch, el.pitch);
+        duty_ratio_y = pid_position_ctrl(pid_y, set_roll, el.roll);
+    #elif defined (SWING_USE_INC_PID)
         duty_ratio_x = pid_incremental_ctrl(pid_x, set_pitch, el.pitch);
         duty_ratio_y = pid_incremental_ctrl(pid_y, set_roll, el.roll);
+    #endif
         swing_move(duty_ratio_x, duty_ratio_y);
         
     #ifdef RT_USING_ANOP
@@ -161,8 +167,13 @@ void swing_mode_2(void)
         /* fetch currnet euler angle */
         dmp_get_eulerangle(&el);
         /* calculate the output duty ratio */
+    #if defined (SWING_USE_POS_PID)
+        duty_ratio_x = pid_position_ctrl(pid_x, set_pitch, el.pitch);
+        duty_ratio_y = pid_position_ctrl(pid_y, set_roll, el.roll);
+    #elif defined (SWING_USE_INC_PID)
         duty_ratio_x = pid_incremental_ctrl(pid_x, set_pitch, el.pitch);
         duty_ratio_y = pid_incremental_ctrl(pid_y, set_roll, el.roll);
+    #endif
         swing_move(duty_ratio_x, duty_ratio_y);
         
     #ifdef RT_USING_ANOP
@@ -195,8 +206,8 @@ void swing_mode_3(void)
         rt_sem_take(&sem, RT_WAITING_FOREVER);
         
         /* calculate angle amplitude */
-        angle_x = atan(radius * cos(angle) / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
-        angle_y = atan(radius * sin(angle) / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
+        angle_x = atan(radius * cos(radian) / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
+        angle_y = atan(radius * sin(radian) / MACHINE_HEIGTH) * RADIAN_TO_ANGLE;
         /* calculate current target radian */
         theta = t * (2 * PI / PENDULUM_CYCLE);
         /* calculate current target angle */
@@ -205,8 +216,13 @@ void swing_mode_3(void)
         /* fetch currnet euler angle */
         dmp_get_eulerangle(&el);
         /* calculate the output duty ratio */
+    #if defined (SWING_USE_POS_PID)
+        duty_ratio_x = pid_position_ctrl(pid_x, set_pitch, el.pitch);
+        duty_ratio_y = pid_position_ctrl(pid_y, set_roll, el.roll);
+    #elif defined (SWING_USE_INC_PID)
         duty_ratio_x = pid_incremental_ctrl(pid_x, set_pitch, el.pitch);
         duty_ratio_y = pid_incremental_ctrl(pid_y, set_roll, el.roll);
+    #endif
         swing_move(duty_ratio_x, duty_ratio_y);
         
     #ifdef RT_USING_ANOP
@@ -239,8 +255,13 @@ void swing_mode_4(void)
         /* fetch currnet euler angle */
         dmp_get_eulerangle(&el);
         /* calculate the output duty ratio */
+    #if defined (SWING_USE_POS_PID)
+        duty_ratio_x = pid_position_ctrl(pid_x, set_pitch, el.pitch);
+        duty_ratio_y = pid_position_ctrl(pid_y, set_roll, el.roll);
+    #elif defined (SWING_USE_INC_PID)
         duty_ratio_x = pid_incremental_ctrl(pid_x, set_pitch, el.pitch);
         duty_ratio_y = pid_incremental_ctrl(pid_y, set_roll, el.roll);
+    #endif
         swing_move(duty_ratio_x, duty_ratio_y);
         
     #ifdef RT_USING_ANOP
@@ -283,8 +304,13 @@ void swing_mode_5(void)
         /* fetch currnet euler angle */
         dmp_get_eulerangle(&el);
         /* calculate the output duty ratio */
+    #if defined (SWING_USE_POS_PID)
+        duty_ratio_x = pid_position_ctrl(pid_x, set_pitch, el.pitch);
+        duty_ratio_y = pid_position_ctrl(pid_y, set_roll, el.roll);
+    #elif defined (SWING_USE_INC_PID)
         duty_ratio_x = pid_incremental_ctrl(pid_x, set_pitch, el.pitch);
         duty_ratio_y = pid_incremental_ctrl(pid_y, set_roll, el.roll);
+    #endif
         swing_move(duty_ratio_x, duty_ratio_y);
         
     #ifdef RT_USING_ANOP
@@ -311,7 +337,7 @@ void swing_set_angle(float a)
 {
     rt_enter_critical();
     if (ANGLE_MIN <= a && a <= ANGLE_MAX)
-        angle = a;
+        radian = a * ANGLE_TO_RADIAN;
     rt_exit_critical();
 }
 
