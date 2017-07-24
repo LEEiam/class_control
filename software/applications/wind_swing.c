@@ -22,11 +22,11 @@
 #define ANGLE_DEFAULT       0.0f        /* default angle */
 
 #define OUTPUT_LIMIT        80          /* output limit for duty ratio in % */
-#define INTEGRAL_SEPARATE   20          /* integral separation in angle */
+#define INTEGRAL_SEPARATE   10          /* integral separation in angle */
 
-#define INC_KP              0           /* Kp for incremental pid controller */
-#define INC_KI              0           /* Ki for incremental pid controller */
-#define INC_KD              0           /* Kd for incremental pid controller */
+#define INC_KP              0.04f       /* Kp for incremental pid controller */
+#define INC_KI              0.01f       /* Ki for incremental pid controller */
+#define INC_KD              450         /* Kd for incremental pid controller */
 
 #define POS_KP              0           /* Kp for position pid controller */
 #define POS_KI              0           /* Ki for position pid controller */
