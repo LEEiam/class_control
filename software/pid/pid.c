@@ -38,6 +38,15 @@ void pid_set_integral_separation(pid_t pid, float separ_imin, float separ_imax)
     }
 }
 
+void pid_set_integral_limit(pid_t pid, float imin, float imax)
+{
+    if (imin < imax)
+    {
+        pid->imin = imin;
+        pid->imax = imax;
+    }
+}
+
 void pid_set_output_limit(pid_t pid, float omin, float omax)
 {
     if (omin < omax)
@@ -55,14 +64,18 @@ float pid_position_ctrl(pid_t pid, float set, float actual)
     pid->set = set;
     pid->actual = actual;
     pid->err = pid->set - pid->actual;
-    /* integral limit */
+    /* integral separation */
     if ((pid->separ_imin != 0 && pid->err < 0 && pid->err < pid->separ_imin) || 
         (pid->separ_imax != 0 && pid->err > 0 && pid->err > pid->separ_imax))
     {
         index = 0;
     }
-    /* todo: must set integral limit */
+    /* set integral limit */
     pid->integral += pid->err;
+    if (pid->imin != 0 && pid->integral < pid->imin)
+        pid->integral = pid->imin;
+    else if (pid->imax != 0 && pid->integral > pid->imax)
+        pid->integral = pid->imax;
     output = pid->Kp * pid->err + 
              pid->Ki * pid->integral * index + 
              pid->Kd * (pid->err - pid->err_last);
