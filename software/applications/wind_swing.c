@@ -8,7 +8,7 @@
 #include "anop.h"
 #endif
 
-#define PENDULUM_CYCLE      1108        /* 1108 ms, rod length: 0.307m */
+#define PENDULUM_CYCLE      1101.5f     /* 1101.5 ms, rod length: 0.301m */
 #define MACHINE_HEIGTH      49          /* heigth of the machine in cm */
 #define PI                  3.14159f    /* ¦° value in float type */
 #define RADIAN_TO_ANGLE     180 / PI    /* convert radian to angle */
@@ -244,9 +244,9 @@ void swing_mode_4(void)
         anop_upload_float(ANOP_FUNC_CUSTOM_2, &el.pitch, 1);
         anop_upload_float(ANOP_FUNC_CUSTOM_3, &duty_ratio_x, 1);
         
-//        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
-//        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
-//        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
     #endif
     }
 }
