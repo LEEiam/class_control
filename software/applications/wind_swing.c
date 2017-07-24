@@ -21,7 +21,11 @@
 #define ANGLE_MAX           180.0f      /* max angle */
 #define ANGLE_DEFAULT       0.0f        /* default angle */
 
+#define SWING_USE_POS_PID
+//#define SWING_USE_INC_PID
+
 #define OUTPUT_LIMIT        80          /* output limit for duty ratio in % */
+#define INTEGRAL_LIMIT      00          /* integral limit in angle */
 #define INTEGRAL_SEPARATE   10          /* integral separation in angle */
 
 #define INC_KP              0.04f       /* Kp for incremental pid controller */
@@ -320,8 +324,19 @@ void swing_init(int mode)
     pid_y = pid_create();
     pid_set_output_limit(pid_x, -OUTPUT_LIMIT, OUTPUT_LIMIT);
     pid_set_output_limit(pid_y, -OUTPUT_LIMIT, OUTPUT_LIMIT);
+#if defined (SWING_USE_POS_PID)
+    pid_set_integral_limit(pid_x, -INTEGRAL_LIMIT, INTEGRAL_LIMIT);
+    pid_set_integral_limit(pid_y, -INTEGRAL_LIMIT, INTEGRAL_LIMIT);
+    pid_set_integral_separation(pid_x, -INTEGRAL_SEPARATE, INTEGRAL_SEPARATE);
+    pid_set_integral_separation(pid_y, -INTEGRAL_SEPARATE, INTEGRAL_SEPARATE);
+    pid_config(pid_x, POS_KP, POS_KI, POS_KD);
+    pid_config(pid_y, POS_KP, POS_KI, POS_KD);
+#elif defined (SWING_USE_INC_PID)
     pid_config(pid_x, INC_KP, INC_KI, INC_KD);
     pid_config(pid_y, INC_KP, INC_KI, INC_KD);
+#else
+    #error "either SWING_USE_POS_PID or SWING_USE_INC_PID must be defined!"
+#endif
     
     switch(mode)
     {
