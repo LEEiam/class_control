@@ -134,9 +134,9 @@ void swing_mode_1(void)
         anop_upload_float(ANOP_FUNC_CUSTOM_2, &el.pitch, 1);
         anop_upload_float(ANOP_FUNC_CUSTOM_3, &duty_ratio_x, 1);
         
-//        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
-//        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
-//        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
     #endif
     }
 }
@@ -181,9 +181,9 @@ void swing_mode_2(void)
         anop_upload_float(ANOP_FUNC_CUSTOM_2, &el.pitch, 1);
         anop_upload_float(ANOP_FUNC_CUSTOM_3, &duty_ratio_x, 1);
         
-//        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
-//        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
-//        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_6, &set_roll, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_7, &el.roll, 1);
+        anop_upload_float(ANOP_FUNC_CUSTOM_8, &duty_ratio_y, 1);
     #endif
     }
 }
