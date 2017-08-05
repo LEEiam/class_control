@@ -8,13 +8,13 @@
 SCL: I2C1_SCL PB6
 SDA: I2C1_SDA PB7
 */
-#define GPIO_PORT_I2C_SCL   GPIOB
+#define GPIO_PORT_I2C_SCL   GPIOC
 #define RCC_I2C_SCL         RCC_AHB1Periph_GPIOB
-#define PIN_I2C_SCL		    GPIO_Pin_6
+#define PIN_I2C_SCL		    GPIO_Pin_2
 
-#define GPIO_PORT_I2C_SDA   GPIOB
+#define GPIO_PORT_I2C_SDA   GPIOC
 #define RCC_I2C_SDA         RCC_AHB1Periph_GPIOB
-#define PIN_I2C_SDA		    GPIO_Pin_7
+#define PIN_I2C_SDA		    GPIO_Pin_3
 
 static struct rt_i2c_bus_device i2c_device;
 
@@ -333,7 +333,7 @@ static struct rt_i2c_bus_device stm32_i2c1;
 
 #endif
 
-void rt_hw_i2c_init(void)
+int rt_hw_i2c_init(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
 
@@ -418,4 +418,6 @@ void rt_hw_i2c_init(void)
     rt_i2c_bus_device_register(&stm32_i2c1, "i2c1");
 
 #endif
+    return 0;
 }
+INIT_DEVICE_EXPORT(rt_hw_i2c_init);

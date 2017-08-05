@@ -24,6 +24,20 @@ if GetDepend('RT_USING_PIN'):
 if GetDepend('RT_USING_I2C') == True:
 	src += ['stm32_i2c.c']
 
+# add ili lcd driver.
+if GetDepend('RT_USING_GUIENGINE') == True:
+	src += ['ili9486l.c']
+
+# add distance sensor.
+if GetDepend('RT_USING_GY53') == True:
+    src += ['gy-53.c']
+
+# add camera sensor.
+#if GetDepend('RT_USING_COLORTRACE') == True:
+    src += ['ov2640.c']
+    src += ['dcmi.c']
+    src += ['sccb.c']
+
 CPPPATH = [cwd]
 
 group = DefineGroup('Drivers', src, depend = [''], CPPPATH = CPPPATH)

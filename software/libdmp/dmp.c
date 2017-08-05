@@ -61,12 +61,17 @@ static int run_self_test(void)
 		gyro[0] = (long)(gyro[0] * sens);
 		gyro[1] = (long)(gyro[1] * sens);
 		gyro[2] = (long)(gyro[2] * sens);
+        rt_kprintf("");
 		dmp_set_gyro_bias(gyro);
 		mpu_get_accel_sens(&accel_sens);
 		accel[0] *= accel_sens;
 		accel[1] *= accel_sens;
 		accel[2] *= accel_sens;
-		dmp_set_accel_bias(accel);
+        rt_kprintf("accel: %ld %ld %ld\n", accel[0], accel[1], accel[2]);
+//        accel[0] = 126120755;
+//        accel[1] = -10374349;
+//        accel[2] = -4177920;
+//		dmp_set_accel_bias(accel);
 		return 0;
 	}
     
@@ -223,6 +228,7 @@ int dmp_sys_init(void)
     
     return 0;
 }
+INIT_COMPONENT_EXPORT(dmp_sys_init);
 
 #ifdef RT_USING_FINSH
 #include <finsh.h>

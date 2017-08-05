@@ -27,6 +27,8 @@
 #include <gdb_stub.h>
 #endif
 
+#include "ili9486l.h"
+
 void rt_init_thread_entry(void* parameter)
 {
     /* GDB STUB */
@@ -34,24 +36,20 @@ void rt_init_thread_entry(void* parameter)
     gdb_set_device("uart6");
     gdb_start();
 #endif
-
-    extern void rt_platform_init(void);
+    {
+        extern void rt_platform_init(void);
+        rt_platform_init();
+    }
     
-    rt_platform_init();
-	
 	rt_components_init();
-
-#ifdef RT_USING_I2C
-    extern void rt_hw_i2c_init();
     
-    rt_hw_i2c_init();
-#endif
-
-#ifdef RT_USING_DMP
-    extern int dmp_sys_init(void);
-    
-    dmp_sys_init();
-#endif
+    OV2640_Init();
+    OV2640_RGB565_Mode();
+    OV2640_Contrast(4);
+    OV2640_OutSize_Set(480, 320);
+    DCMI_DMA_Init(0x60020000, 1, DMA_MemoryDataSize_HalfWord);
+    *((volatile rt_uint16_t *) 0x60000000) = LCD_GRAM;
+    DCMI_Start();
 }
 
 int rt_application_init()

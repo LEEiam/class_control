@@ -82,6 +82,31 @@ void SysTick_Handler(void)
     rt_interrupt_leave();
 }
 
+void rt_hw_us_delay(int us)
+{
+#define USECOND_PER_TICK (1000000 / RT_TICK_PER_SECOND)
+    
+    rt_uint32_t delta = 0;
+    rt_uint32_t pre_tick = SysTick->VAL;
+    rt_uint32_t cur_tick;
+    
+    RT_ASSERT(us < USECOND_PER_TICK);
+    
+    us = us * (SysTick->LOAD / USECOND_PER_TICK);
+    for (;;)
+    {
+        cur_tick = SysTick->VAL;
+        if (cur_tick < pre_tick)
+            delta += pre_tick - cur_tick;
+        else
+            delta += SysTick->LOAD + pre_tick - cur_tick;
+        pre_tick = cur_tick;
+        
+        if (delta >= us)
+            return;
+    }
+}
+
 /**
  * This function will initial STM32 board.
  */

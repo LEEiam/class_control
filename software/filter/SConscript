@@ -1,0 +1,11 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+cwd     = os.path.join(str(Dir('#')), 'filter')
+src	= Glob('*.c')
+CPPPATH = [cwd, str(Dir('#'))]
+
+group = DefineGroup('Filter', src, depend = ['RT_USING_FILTER'], CPPPATH = CPPPATH)
+
+Return('group')

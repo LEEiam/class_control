@@ -61,6 +61,7 @@ extern int __bss_end;
 // 	<i>Default: 1
 #define STM32_CONSOLE_USART		1
 
+void rt_hw_us_delay(int us);
 void rt_hw_board_init(void);
 
 #if STM32_CONSOLE_USART == 0

@@ -33,10 +33,12 @@
 
 #define UART2_GPIO_TX       GPIO_Pin_2
 #define UART2_TX_PIN_SOURCE GPIO_PinSource2
-#define UART2_GPIO_RX       GPIO_Pin_3
-#define UART2_RX_PIN_SOURCE GPIO_PinSource3
-#define UART2_GPIO          GPIOA
-#define UART2_GPIO_RCC      RCC_AHB1Periph_GPIOA
+#define UART2_GPIO_RX       GPIO_Pin_6
+#define UART2_RX_PIN_SOURCE GPIO_PinSource6
+#define UART2_TX            GPIOA
+#define UART2_RX            GPIOD
+#define UART2_GPIO_RCC_TX   RCC_AHB1Periph_GPIOA
+#define UART2_GPIO_RCC_RX   RCC_AHB1Periph_GPIOD
 #define RCC_APBPeriph_UART2 RCC_APB1Periph_USART2
 
 #define UART3_GPIO_TX       GPIO_Pin_8
@@ -528,7 +530,7 @@ static void RCC_Configuration(void)
 
 #ifdef RT_USING_UART2
     /* Enable UART2 GPIO clocks */
-    RCC_AHB1PeriphClockCmd(UART2_GPIO_RCC, ENABLE);
+    RCC_AHB1PeriphClockCmd(UART2_GPIO_RCC_TX | UART2_GPIO_RCC_RX, ENABLE);
     /* Enable UART2 clock */
     RCC_APB1PeriphClockCmd(RCC_APBPeriph_UART2, ENABLE);
 #endif /* RT_USING_UART1 */
@@ -576,12 +578,14 @@ static void GPIO_Configuration(void)
 
 #ifdef RT_USING_UART2
     /* Configure USART2 Rx/tx PIN */
-    GPIO_InitStructure.GPIO_Pin = UART2_GPIO_RX | UART2_GPIO_TX;
-    GPIO_Init(UART2_GPIO, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = UART2_GPIO_TX;
+    GPIO_Init(UART2_TX, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = UART2_GPIO_RX;
+    GPIO_Init(UART2_RX, &GPIO_InitStructure);
 
     /* Connect alternate function */
-    GPIO_PinAFConfig(UART2_GPIO, UART2_TX_PIN_SOURCE, GPIO_AF_USART2);
-    GPIO_PinAFConfig(UART2_GPIO, UART2_RX_PIN_SOURCE, GPIO_AF_USART2);
+    GPIO_PinAFConfig(UART2_TX, UART2_TX_PIN_SOURCE, GPIO_AF_USART2);
+    GPIO_PinAFConfig(UART2_RX, UART2_RX_PIN_SOURCE, GPIO_AF_USART2);
 #endif /* RT_USING_UART2 */
 
 #ifdef RT_USING_UART3
